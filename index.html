@@ -1,195 +1,172 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <title>Suivi des Incidents</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>📊 Suivi des Incidents</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f7fa; color: #333; }
-    h1 { text-align: center; color: #2c3e50; }
-    h2 { margin-top: 40px; color: #34495e; }
-    form { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
-    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    textarea { resize: vertical; }
-    button { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; }
-    button:hover { background: #2980b9; }
-    #incidents { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
-    .incident { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-left: 6px solid #3498db; }
-    .incident strong { color: #2c3e50; font-size: 16px; }
-    .incident b { color: #34495e; }
-    #alert { display:none; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:10px; border-radius:8px; margin:10px auto; max-width:600px; text-align:center; }
-    #reloadBtn { margin-top:10px; background:#ffc107; color:#212529; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; }
-    #reloadBtn:hover { background:#e0a800; }
-    #header { text-align:center; margin-bottom:20px; }
-    #header img { height:80px; display:block; margin:0 auto 10px auto; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    /* Ajout du logo en arrière-plan (filigrane) */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('logo.png') no-repeat center center;
+      background-size: 400px;  /* taille du logo */
+      opacity: 0.08;           /* transparence */
+      z-index: -1;             /* en arrière-plan */
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background-color: #0078d7;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #005a9e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 <body>
-  <div id="header">
-    <img src="logo.png" alt="Logo UP MRE">
-  background: url('logo.png') no-repeat center center fixed;
-  background-size: 400px; /* Ajuste la taille */
-  background-color: #f9f9f9; /* Couleur de fond si logo trop petit */
+  <div class="container">
     <h1>📊 Suivi des Incidents</h1>
+
+    <!-- Formulaire -->
+    <div class="form-group">
+      <label for="titre">Titre</label>
+      <input type="text" id="titre">
+    </div>
+    <div class="form-group">
+      <label for="lieu">Lieu</label>
+      <select id="lieu"></select>
+    </div>
+    <div class="form-group">
+      <label for="equipe">Équipe</label>
+      <select id="equipe"></select>
+    </div>
+    <div class="form-group">
+      <label for="date">Date</label>
+      <input type="date" id="date">
+    </div>
+    <div class="form-group">
+      <label for="astreinte">Astreinte</label>
+      <select id="astreinte"></select>
+    </div>
+    <div class="form-group">
+      <label for="commentaire">Commentaire intervention</label>
+      <textarea id="commentaire"></textarea>
+    </div>
+    <button onclick="ajouterIncident()">➕ Ajouter un incident</button>
+
+    <!-- Tableau des incidents -->
+    <table id="tableIncidents">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Lieu</th>
+          <th>Équipe</th>
+          <th>Date</th>
+          <th>Astreinte</th>
+          <th>Commentaire</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
-
-  <div id="alert">
-    ⚠️ Les données affichées proviennent des valeurs par défaut (fichiers JSON non chargés).
-    <br>
-    <button id="reloadBtn">🔄 Recharger les données</button>
-  </div>
-
-  <h2>➕ Nouvel incident</h2>
-  <form id="incidentForm">
-    <label>Équipement</label>
-    <input id="equipement" required />
-
-    <label>Lieu</label>
-    <select id="lieu"></select>
-
-    <label>Équipe</label>
-    <select id="equipe"></select>
-
-    <label>Date</label>
-    <input id="dateIncident" type="date" />
-
-    <label>Type</label>
-    <select id="type"></select>
-
-    <label>Gravité</label>
-    <select id="gravite"></select>
-
-    <label>Astreinte</label>
-    <select id="astreinte"></select>
-
-    <label>Description</label>
-    <textarea id="description"></textarea>
-
-    <label>Commentaire intervention</label>
-    <textarea id="commentaire"></textarea>
-
-    <button type="submit">💾 Enregistrer</button>
-  </form>
-
-  <h2>📋 Liste des incidents</h2>
-  <div id="incidents"></div>
 
   <script>
-    let incidents = [];
-    let fallbackUsed = false;
+    const incidents = [];
 
-    const defaults = {
-      "lieu.json": ["Atelier", "Entrepôt", "Salle Serveurs", "Bureau", "Extérieur"],
-      "equipe.json": ["Équipe Maintenance", "Équipe Réseau", "Équipe Sécurité", "Équipe Production"],
-      "type.json": ["Panne", "Maintenance", "Sécurité", "Autre"],
-      "gravite.json": ["Faible", "Moyenne", "Critique"],
-      "astreinte.json": ["Oui", "Non"]
-    };
+    function ajouterIncident() {
+      const titre = document.getElementById("titre").value;
+      const lieu = document.getElementById("lieu").value;
+      const equipe = document.getElementById("equipe").value;
+      const date = document.getElementById("date").value;
+      const astreinte = document.getElementById("astreinte").value;
+      const commentaire = document.getElementById("commentaire").value;
 
-    function render(){
-      const c = document.getElementById("incidents");
-      c.innerHTML = "";
-      incidents.forEach((inc, i) => {
-        const div = document.createElement("div");
-        div.className = "incident";
-        div.innerHTML = `
-          <strong>#${i+1} - ${inc.equipement}</strong><br>
-          📍 ${inc.lieu} | 👥 ${inc.equipe} | 📅 ${inc.dateIncident}<br>
-          ⚡ ${inc.type} | 🔥 ${inc.gravite} | ☎️ ${inc.astreinte}<br><br>
-          <b>Description :</b> ${inc.description}<br>
-          <b>Commentaire :</b> ${inc.commentaire}<br>
-        `;
-        c.appendChild(div);
+      const incident = { titre, lieu, equipe, date, astreinte, commentaire };
+      incidents.push(incident);
+
+      afficherIncidents();
+    }
+
+    function afficherIncidents() {
+      const tbody = document.querySelector("#tableIncidents tbody");
+      tbody.innerHTML = "";
+
+      incidents.forEach(inc => {
+        const row = `<tr>
+          <td>${inc.titre}</td>
+          <td>${inc.lieu}</td>
+          <td>${inc.equipe}</td>
+          <td>${inc.date}</td>
+          <td>${inc.astreinte}</td>
+          <td>${inc.commentaire}</td>
+        </tr>`;
+        tbody.innerHTML += row;
       });
     }
-
-    async function loadOptions(file, selectId){
-      const select = document.getElementById(selectId);
-      try {
-        const res = await fetch(file);
-        if(res.ok){
-          const values = await res.json();
-          select.innerHTML = "";
-          values.forEach(v => {
-            const opt = document.createElement("option");
-            opt.value = v;
-            opt.textContent = v;
-            select.appendChild(opt);
-          });
-          return;
-        }
-      } catch(e){
-        console.warn(`⚠️ Impossible de charger ${file}, fallback sur valeurs par défaut.`);
-        fallbackUsed = true;
-        document.getElementById("alert").style.display = "block";
-      }
-      if(defaults[file]){
-        select.innerHTML = "";
-        defaults[file].forEach(v => {
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          select.appendChild(opt);
-        });
-      }
-    }
-
-    async function loadFromFile(){
-      try {
-        const res = await fetch("incidents.json");
-        if(res.ok){
-          incidents = await res.json();
-          render();
-        }
-      } catch(e){
-        console.log("Pas de incidents.json trouvé.");
-      }
-    }
-
-    function saveData(){
-      const blob=new Blob([JSON.stringify(incidents,null,2)],{type:"application/json"});
-      const a=document.createElement("a");
-      a.href=URL.createObjectURL(blob);
-      a.download="incidents.json";
-      a.click();
-    }
-
-    document.getElementById("incidentForm").addEventListener("submit", e=>{
-      e.preventDefault();
-      const inc = {
-        equipement: document.getElementById("equipement").value,
-        lieu: document.getElementById("lieu").value,
-        equipe: document.getElementById("equipe").value,
-        dateIncident: document.getElementById("dateIncident").value,
-        type: document.getElementById("type").value,
-        gravite: document.getElementById("gravite").value,
-        astreinte: document.getElementById("astreinte").value,
-        description: document.getElementById("description").value,
-        commentaire: document.getElementById("commentaire").value
-      };
-      incidents.push(inc);
-      render();
-      saveData();
-    });
-
-    document.getElementById("reloadBtn").addEventListener("click", () => {
-      loadOptions("lieu.json","lieu");
-      loadOptions("equipe.json","equipe");
-      loadOptions("type.json","type");
-      loadOptions("gravite.json","gravite");
-      loadOptions("astreinte.json","astreinte");
-      loadFromFile();
-    });
-
-    window.onload = () => {
-      loadFromFile();
-      loadOptions("lieu.json","lieu");
-      loadOptions("equipe.json","equipe");
-      loadOptions("type.json","type");
-      loadOptions("gravite.json","gravite");
-      loadOptions("astreinte.json","astreinte");
-    };
   </script>
 </body>
 </html>
