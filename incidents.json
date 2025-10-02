@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "equipement": "a",
+    "lieu": "Atelier",
+    "equipe": "Équipe Maintenance",
+    "dateIncident": "",
+    "type": "Panne",
+    "gravite": "Faible",
+    "astreinte": "Oui",
+    "description": "",
+    "commentaire": ""
+  }
+]
