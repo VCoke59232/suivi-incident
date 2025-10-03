@@ -1,8 +1,7 @@
 [
-  "",
-  "Atelier",
-  "Entrepôt",
-  "Salle Serveurs",
-  "Bureau",
-  "Extérieur"
+  { "value": "Paris", "label": "Paris" },
+  { "value": "Lyon", "label": "Lyon" },
+  { "value": "Marseille", "label": "Marseille" },
+  { "value": "Bordeaux", "label": "Bordeaux" },
+  { "value": "Lille", "label": "Lille" }
 ]
