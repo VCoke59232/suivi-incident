@@ -65,7 +65,7 @@
         <label>Équipement</label>      <input id="equipement" required>
         <label>Date de l'incident</label>    <input id="dateIncident" type="date">		
 		<label>Description de l'incident</label>    <textarea id="description"></textarea>
-		 <label for="lieu">Choisissez une ville :</label> <select id="lieu" placeholder="Sélectionnez une ville"  </select>
+		 <label for="lieu">Choisissez une ville :</label> <select id="lieu" placeholder="Sélectionnez une ville" ></select>
 		
 
       </div>
@@ -163,7 +163,7 @@ el('btnNew').addEventListener('click', ()=>{ hideHistorique(); });
 window.addEventListener('DOMContentLoaded', ()=>{ loadFromFile(); loadOptions('lieu.json','lieu'); loadOptions('equipe.json','equipe'); loadOptions('type.json','type'); loadOptions('gravite.json','gravite'); loadOptions('astreinte.json','astreinte'); loadOptions('status.json','status'); try{ const saved = localStorage.getItem('incidents_v6'); if(saved){ incidents = JSON.parse(saved); render(); } }catch(e){} });
    
    // Initialisation de Choices
-    const selectlieu = new Choices('#ville', {
+    const selectlieu = new Choices('#lieu', {
       searchEnabled: true,      // active le champ de recherche
       itemSelectText: '',       // enlève le texte "Appuyez pour sélectionner"
       placeholderValue: 'Choisissez une ville', 
