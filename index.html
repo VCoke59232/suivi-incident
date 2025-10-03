@@ -163,7 +163,7 @@ el('btnNew').addEventListener('click', ()=>{ hideHistorique(); });
 window.addEventListener('DOMContentLoaded', ()=>{ loadFromFile(); loadOptions('lieu.json','lieu'); loadOptions('equipe.json','equipe'); loadOptions('type.json','type'); loadOptions('gravite.json','gravite'); loadOptions('astreinte.json','astreinte'); loadOptions('status.json','status'); try{ const saved = localStorage.getItem('incidents_v6'); if(saved){ incidents = JSON.parse(saved); render(); } }catch(e){} });
    
    // Initialisation de Choices
-    const selectlieu = new Choices('#lieu', {
+    const selectlieu = new Choices('#ville', {
       searchEnabled: true,      // active le champ de recherche
       itemSelectText: '',       // enlève le texte "Appuyez pour sélectionner"
       placeholderValue: 'Choisissez une ville', 
