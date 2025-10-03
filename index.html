@@ -35,6 +35,8 @@
     .hidden { display:none; }
     @media (max-width:800px){ form{flex-direction:column;} .topbar{flex-direction:column; align-items:stretch;} }
   </style>
+  <!-- CSS Choices -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
 </head>
 <body>
   <div id="header">
@@ -59,40 +61,25 @@
   <div id="mainApp">
     <form id="incidentForm" autocomplete="off">
       <div class="col">
-        <label>Équipement</label>
-        <input id="equipement" required>
+	    <label>Lieu</label>            <select id="lieu"></select>  
+        <label>Équipement</label>      <input id="equipement" required>
+        <label>Date de l'incident</label>    <input id="dateIncident" type="date">		
+		<label>Description de l'incident</label>    <textarea id="description"></textarea>
+		 <label for="lieu">Choisissez une ville :</label> <select id="lieu" placeholder="Sélectionnez une ville"  </select>
+		
 
-        <label>Lieu</label>
-        <select id="lieu"></select>
-
-        <label>Équipe</label>
-        <select id="equipe"></select>
-
-        <label>Date de l'incident</label>
-        <input id="dateIncident" type="date">
       </div>
       <div class="col">
-        <label>Type</label>
-        <select id="type"></select>
-
-        <label>Gravité</label>
-        <select id="gravite"></select>
-
-        <label>Astreinte</label>
-        <select id="astreinte"></select>
-
-        <label>Status</label>
-        <select id="status"></select>
-
-        <label>Date de clôture</label>
-        <input id="closureDate" type="date">
+        <label>Type</label>       <select id="type"></select>
+        <label>Gravité</label>     <select id="gravite"></select>
+        <label>Astreinte</label>   <select id="astreinte"></select>
+        <label>Status</label>      <select id="status"></select>
+        <label>Date de clôture</label>    <input id="closureDate" type="date">
       </div>
       <div class="col">
-        <label>Description</label>
-        <textarea id="description"></textarea>
-
-        <label>Commentaire intervention</label>
-        <textarea id="commentaire"></textarea>
+        <label>Équipe</label>          <select id="equipe"></select>
+		<label>Date d'intervention</label>    <input id="interventionDate" type="date">
+		<label>Commentaire intervention</label>     <textarea id="commentaire"></textarea>
 
         <div class="actions" style="margin-top:12px;">
           <button type="submit" class="primary">💾 Enregistrer</button>
@@ -174,6 +161,18 @@ el('reloadBtn').addEventListener('click', ()=>{ loadOptions('lieu.json','lieu');
 el('btnHistory').addEventListener('click', showHistorique);
 el('btnNew').addEventListener('click', ()=>{ hideHistorique(); });
 window.addEventListener('DOMContentLoaded', ()=>{ loadFromFile(); loadOptions('lieu.json','lieu'); loadOptions('equipe.json','equipe'); loadOptions('type.json','type'); loadOptions('gravite.json','gravite'); loadOptions('astreinte.json','astreinte'); loadOptions('status.json','status'); try{ const saved = localStorage.getItem('incidents_v6'); if(saved){ incidents = JSON.parse(saved); render(); } }catch(e){} });
+   
+   // Initialisation de Choices
+    const selectLieu = new Choices('#lieu', {
+      searchEnabled: true,      // active le champ de recherche
+      itemSelectText: '',       // enlève le texte "Appuyez pour sélectionner"
+      placeholderValue: 'Choisissez une ville', 
+      noResultsText: 'Aucun résultat', 
+      noChoicesText: 'Aucune option disponible',
+      shouldSort: false         // garde l’ordre initial des options
+    });
+
+
 </script>
 </body>
 </html>
