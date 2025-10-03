@@ -1,149 +1,179 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Suivi des Incidents - UP MRE</title>
+  <meta charset="utf-8" />
+  <title>Suivi des Incidents</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f7fa; margin:0; }
-    header { background:#003366; color:white; padding:15px; display:flex; align-items:center; }
-    header img { height:50px; margin-right:15px; }
-    header h1 { font-size:1.5em; }
-    .container { padding:20px; }
-    .form-card, .history-card { background:white; padding:20px; border-radius:10px; 
-      box-shadow:0 2px 6px rgba(0,0,0,0.2); margin-bottom:20px; }
-    label { display:block; margin-top:10px; }
-    input, select, textarea { width:100%; padding:8px; margin-top:5px; border-radius:5px; border:1px solid #ccc; }
-    button { margin-top:15px; padding:10px 15px; border:none; border-radius:5px; cursor:pointer; }
-    button.primary { background:#003366; color:white; }
-    button.secondary { background:#ccc; }
-    table { width:100%; border-collapse:collapse; margin-top:20px; }
-    th { background:#003366; color:white; padding:10px; }
-    td { border:1px solid #ddd; padding:8px; }
-    tr:nth-child(even){ background:#f9f9f9; }
-    tr:hover { background:#eef; }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f7fa; color: #333; }
+    #header { text-align:center; margin-bottom:20px; }
+    #header img { height:80px; display:block; margin:0 auto 10px auto; }
+    h1 { text-align: center; color: #2c3e50; margin:0; }
+    h2 { margin-top: 30px; color: #34495e; }
+    .controls { text-align:center; margin-bottom:12px; }
+    form { background: #fff; padding: 18px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); max-width: 920px; margin: auto; display:flex; gap:16px; flex-wrap:wrap; }
+    .col { flex:1 1 280px; min-width:240px; }
+    label { display:block; margin-top: 8px; font-weight:600; font-size:13px; color:#334155; }
+    input, select, textarea { width:100%; padding:8px; margin-top:6px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; }
+    textarea { min-height:80px; }
+    .actions { display:flex; gap:8px; align-items:center; }
+    button { padding:10px 14px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+    button.primary { background:#4c1d95; color:#fff; }
+    button.secondary { background:#e5e7eb; color:#111827; }
+    #alert { display:none; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:10px; border-radius:8px; margin:10px auto; max-width:920px; text-align:center; }
+    #incidents { margin-top:20px; max-width:1100px; margin-left:auto; margin-right:auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; max-width:1100px; margin:0 auto 10px auto; }
+    .incident { background:#fff; padding:14px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06); display:flex; justify-content:space-between; gap:12px; align-items:flex-start; border-left:6px solid #4c1d95; }
+    .incident .infos { flex:1; }
+    .incident .meta { color:#475569; font-size:13px; margin-top:8px; }
+    .styled-table { border-collapse: collapse; margin: 14px 0; font-size: 14px; width:100%; box-shadow: 0 0 8px rgba(0,0,0,0.06); border-radius:8px; overflow:hidden; }
+    .styled-table thead th { background:#4c1d95; color:#fff; padding:10px; text-align:left; font-weight:600; }
+    .styled-table tbody td { padding:10px; border-bottom:1px solid #e6eaf0; }
+    .styled-table tbody tr:nth-child(even) { background:#f8fafc; }
+    .styled-table tbody tr:hover { background:#eef2ff; }
+    .hidden { display:none; }
+    @media (max-width:800px){ form{flex-direction:column;} .topbar{flex-direction:column; align-items:stretch;} }
   </style>
 </head>
 <body>
-<header>
-  <img src="logo.png" alt="Logo">
-  <h1>Suivi des Incidents - UP MRE</h1>
-</header>
-
-<div class="container">
-  <div class="form-card" id="formSection">
-    <h2>Nouvel Incident</h2>
-    <label>Lieu <select id="lieu"></select></label>
-    <label>Équipe <select id="equipe"></select></label>
-    <label>Date <input type="date" id="date"></label>
-    <label>Astreinte <select id="astreinte"></select></label>
-    <label>Type <select id="type"></select></label>
-    <label>Gravité <select id="gravite"></select></label>
-    <label>Commentaire <textarea id="commentaire"></textarea></label>
-    <label>Status <select id="status"></select></label>
-    <button class="primary" onclick="ajouterIncident()">Enregistrer</button>
-    <button class="secondary" onclick="afficherHistorique(incidents)">📜 Voir l’historique</button>
+  <div id="header">
+    <img src="logo.png" alt="Logo UP MRE" onerror="this.style.display='none'">
+    <h1>📊 Suivi des Incidents</h1>
   </div>
 
-  <div class="history-card" id="historySection" style="display:none;">
-    <h2>Historique des incidents</h2>
-    <label>Filtrer par lieu <select id="filtreLieu" onchange="filtrerHistorique()"></select></label>
-    <table id="tableHistorique">
+  <div id="alert">⚠️ Les données affichées proviennent des valeurs par défaut (fichiers JSON non chargés). <button id="reloadBtn" style="margin-left:12px;">🔄 Recharger</button></div>
+
+  <div class="topbar">
+    <div class="controls">
+      <button class="primary" id="btnNew">➕ Nouvel incident</button>
+      <button class="secondary" id="btnHistory">📜 Historique</button>
+    </div>
+    <div style="text-align:right;">
+      <button id="exportBtn" class="secondary">💾 Export JSON</button>
+      <button id="importBtn" class="secondary">📂 Import JSON</button>
+      <input type="file" id="fileInput" accept="application/json" style="display:none">
+    </div>
+  </div>
+
+  <div id="mainApp">
+    <form id="incidentForm" autocomplete="off">
+      <div class="col">
+        <label>Équipement</label>
+        <input id="equipement" required>
+
+        <label>Lieu</label>
+        <select id="lieu"></select>
+
+        <label>Équipe</label>
+        <select id="equipe"></select>
+
+        <label>Date de l'incident</label>
+        <input id="dateIncident" type="date">
+      </div>
+      <div class="col">
+        <label>Type</label>
+        <select id="type"></select>
+
+        <label>Gravité</label>
+        <select id="gravite"></select>
+
+        <label>Astreinte</label>
+        <select id="astreinte"></select>
+
+        <label>Status</label>
+        <select id="status"></select>
+
+        <label>Date de clôture</label>
+        <input id="closureDate" type="date">
+      </div>
+      <div class="col">
+        <label>Description</label>
+        <textarea id="description"></textarea>
+
+        <label>Commentaire intervention</label>
+        <textarea id="commentaire"></textarea>
+
+        <div class="actions" style="margin-top:12px;">
+          <button type="submit" class="primary">💾 Enregistrer</button>
+          <button type="button" id="cancelBtn" class="secondary">❌ Annuler</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div id="historique" class="hidden">
+    <h2>📜 Historique des incidents</h2>
+    <label for="filterLieu">Filtrer par lieu :</label>
+    <select id="filterLieu"><option value="">-- Tous les lieux --</option></select>
+
+    <table id="tableHistorique" class="styled-table" style="width:100%; margin-top:12px;">
       <thead>
-        <tr>
-          <th>Date création</th><th>Date clôture</th><th>Lieu</th><th>Équipe</th>
-          <th>Type</th><th>Gravité</th><th>Status</th><th>Commentaire</th><th>Action</th>
-        </tr>
+        <tr><th>Date création</th><th>Date clôture</th><th>Lieu</th><th>Équipe</th><th>Type</th><th>Gravité</th><th>Status</th><th>Commentaire</th></tr>
       </thead>
       <tbody></tbody>
     </table>
-    <button class="secondary" onclick="retour()">⬅ Retour</button>
+    <button class="secondary" id="btnBack">⬅ Retour</button>
   </div>
-</div>
+
+  <div id="incidents"></div>
 
 <script>
 let incidents = [];
-let lieux = ["Atelier","Sous-station","Voie 1","Voie 2"];
-let equipes = ["Équipe A","Équipe B"];
-let types = ["Électrique","Signalisation","Voie"];
-let gravites = ["Mineure","Majeure","Critique"];
-let astreintes = ["Jour","Nuit"];
-let statusList = ["Ouvert","Clos"];
-
-function init(){
-  remplirSelect("lieu", lieux);
-  remplirSelect("equipe", equipes);
-  remplirSelect("type", types);
-  remplirSelect("gravite", gravites);
-  remplirSelect("astreinte", astreintes);
-  remplirSelect("status", statusList);
-  remplirSelect("filtreLieu", ["Tous"].concat(lieux));
-  chargerData();
+let fallbackUsed = false;
+const defaults = {
+  "lieu.json": ["Atelier","Entrepôt","Salle Serveurs","Bureau","Extérieur"],
+  "equipe.json": ["Équipe Maintenance","Équipe Réseau","Équipe Sécurité","Équipe Production"],
+  "type.json": ["Panne","Maintenance","Sécurité","Autre"],
+  "gravite.json": ["Faible","Moyenne","Critique"],
+  "astreinte.json": ["Oui","Non"],
+  "status.json": ["Ouvert","Clos"]
+};
+function el(id){ return document.getElementById(id); }
+function showAlert(){ el('alert').style.display='block'; }
+function hideAlert(){ el('alert').style.display='none'; }
+async function loadOptions(file, selectId){
+  const select = el(selectId);
+  try{
+    const res = await fetch(file);
+    if(res.ok){ const values = await res.json(); fillSelect(select, values); return; }
+  }catch(e){ console.warn('loadOptions failed', file); fallbackUsed=true; showAlert(); }
+  if(defaults[file]) fillSelect(select, defaults[file]);
 }
-
-function remplirSelect(id, data){
-  const s=document.getElementById(id); s.innerHTML="";
-  data.forEach(v=>{ const o=document.createElement("option"); o.value=v;o.text=v;s.appendChild(o);});
+function fillSelect(select, values){
+  select.innerHTML='';
+  values.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; select.appendChild(o); });
 }
-
-function ajouterIncident(){
-  const inc={
-    lieu:val("lieu"), equipe:val("equipe"), date:val("date"), astreinte:val("astreinte"),
-    type:val("type"), gravite:val("gravite"), commentaire:val("commentaire"), status:val("status"),
-    createdAt:new Date().toISOString().slice(0,10),
-    closureDate: val("status")==="Clos"? new Date().toISOString().slice(0,10):""
-  };
-  incidents.push(inc); saveData(); alert("Incident ajouté");
+async function loadFromFile(){
+  try{
+    const res = await fetch('incidents.json');
+    if(res.ok){ incidents = await res.json(); render(); }
+  }catch(e){ console.warn('no incidents.json'); }
 }
-
-function val(id){return document.getElementById(id).value;}
-
-function afficherHistorique(data){
-  document.getElementById("formSection").style.display="none";
-  document.getElementById("historySection").style.display="block";
-  const tbody=document.querySelector("#tableHistorique tbody"); tbody.innerHTML="";
-  data.forEach((inc,idx)=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${inc.createdAt||""}</td>
-      <td>${inc.closureDate||""}</td>
-      <td>${inc.lieu||""}</td>
-      <td>${inc.equipe||""}</td>
-      <td>${inc.type||""}</td>
-      <td>${inc.gravite||""}</td>
-      <td>${inc.status||""}</td>
-      <td>${inc.commentaire||""}</td>
-      <td>${inc.status==="Ouvert"? `<button class="primary" onclick="cloturerIncident(${idx})">Clôturer</button>`:"✅"}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+function saveData(download=true){
+  try{ localStorage.setItem('incidents_v6', JSON.stringify(incidents)); }catch(e){}
+  if(download){
+    const blob = new Blob([JSON.stringify(incidents,null,2)],{type:'application/json'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='incidents.json'; a.click();
+  }
 }
-
-function cloturerIncident(index){
-  incidents[index].status="Clos";
-  incidents[index].closureDate=new Date().toISOString().slice(0,10);
-  saveData(); afficherHistorique(incidents);
-}
-
-function retour(){
-  document.getElementById("formSection").style.display="block";
-  document.getElementById("historySection").style.display="none";
-}
-
-function filtrerHistorique(){
-  const f=document.getElementById("filtreLieu").value;
-  if(f==="Tous") afficherHistorique(incidents);
-  else afficherHistorique(incidents.filter(i=>i.lieu===f));
-}
-
-function saveData(){
-  localStorage.setItem("incidents", JSON.stringify(incidents));
-}
-
-function chargerData(){
-  const d=localStorage.getItem("incidents");
-  if(d) incidents=JSON.parse(d);
-}
-window.onload=init;
+function render(){ const c = el('incidents'); c.innerHTML=''; incidents.forEach((inc,i)=>{ const d = document.createElement('div'); d.className='incident'; d.innerHTML = `<div class="infos"><strong>#${i+1} - ${escapeHtml(inc.equipement||'--')}</strong><div class="meta">📍 ${escapeHtml(inc.lieu||'--')} | 👥 ${escapeHtml(inc.equipe||'--')} | 📅 ${escapeHtml(inc.dateIncident||'--')}</div><div class="meta">⚡ ${escapeHtml(inc.type||'--')} | 🔥 ${escapeHtml(inc.gravite||'--')} | ☎️ ${escapeHtml(inc.astreinte||'--')}</div><div class="meta">Status: ${escapeHtml(inc.status||'--')} | Clôture: ${escapeHtml(inc.closureDate||'--')}</div><p><b>Description:</b> ${escapeHtml(inc.description||'')}</p><p><b>Commentaire:</b> ${escapeHtml(inc.commentaire||'')}</p></div>`; c.appendChild(d); }); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+el('incidentForm').addEventListener('submit', function(e){ e.preventDefault(); const inc = { equipement: el('equipement').value.trim(), lieu: el('lieu').value, equipe: el('equipe').value, dateIncident: el('dateIncident').value, type: el('type').value, gravite: el('gravite').value, astreinte: el('astreinte').value, status: el('status').value, closureDate: el('closureDate').value||'', description: el('description').value.trim(), commentaire: el('commentaire').value.trim(), createdAt: new Date().toISOString() }; if(inc.status.toLowerCase().startsWith('clos') && !inc.closureDate){ const d = new Date(); inc.closureDate = d.toISOString().slice(0,10); } incidents.push(inc); render(); saveData(true); alert('Incident enregistré et JSON généré.'); el('incidentForm').reset(); });
+el('cancelBtn').addEventListener('click', ()=>{ el('incidentForm').reset(); });
+el('status').addEventListener('change', ()=>{ const s = el('status').value.toLowerCase(); el('closureDate').disabled = !(s.indexOf('clos')>=0 || s.indexOf('ferme')>=0); });
+function showHistorique(){ el('mainApp').classList.add('hidden'); el('historique').classList.remove('hidden'); populateFilterLieu(); afficherHistorique(incidents); }
+function hideHistorique(){ el('historique').classList.add('hidden'); el('mainApp').classList.remove('hidden'); }
+function populateFilterLieu(){ const select = el('filterLieu'); select.innerHTML = '<option value="">-- Tous les lieux --</option>'; const opts = Array.from(el('lieu').options).map(o=>o.value); opts.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; select.appendChild(o); }); }
+function afficherHistorique(data){ const tbody = document.querySelector('#tableHistorique tbody'); tbody.innerHTML=''; data.forEach(inc=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(inc.createdAt?inc.createdAt.slice(0,10):'')}</td><td>${escapeHtml(inc.closureDate||'')}</td><td>${escapeHtml(inc.lieu||'')}</td><td>${escapeHtml(inc.equipe||'')}</td><td>${escapeHtml(inc.type||'')}</td><td>${escapeHtml(inc.gravite||'')}</td><td>${escapeHtml(inc.status||'')}</td><td>${escapeHtml(inc.commentaire||'')}</td>`; tbody.appendChild(tr); }); }
+function filtrerHistorique(){ const lieu = el('filterLieu').value; const data = incidents.filter(i=> !lieu || i.lieu===lieu); afficherHistorique(data); }
+el('exportBtn').addEventListener('click', ()=> saveData(true));
+el('importBtn').addEventListener('click', ()=> el('fileInput').click());
+el('fileInput').addEventListener('change', function(e){ const f = this.files[0]; if(!f) return; const r = new FileReader(); r.onload = ()=>{ try{ incidents = JSON.parse(r.result); render(); }catch(err){ alert('Erreur lecture JSON'); } }; r.readAsText(f); });
+el('reloadBtn').addEventListener('click', ()=>{ loadOptions('lieu.json','lieu'); loadOptions('equipe.json','equipe'); loadOptions('type.json','type'); loadOptions('gravite.json','gravite'); loadOptions('astreinte.json','astreinte'); loadOptions('status.json','status'); loadFromFile(); });
+el('btnHistory').addEventListener('click', showHistorique);
+el('btnNew').addEventListener('click', ()=>{ hideHistorique(); });
+window.addEventListener('DOMContentLoaded', ()=>{ loadFromFile(); loadOptions('lieu.json','lieu'); loadOptions('equipe.json','equipe'); loadOptions('type.json','type'); loadOptions('gravite.json','gravite'); loadOptions('astreinte.json','astreinte'); loadOptions('status.json','status'); try{ const saved = localStorage.getItem('incidents_v6'); if(saved){ incidents = JSON.parse(saved); render(); } }catch(e){} });
 </script>
 </body>
 </html>
