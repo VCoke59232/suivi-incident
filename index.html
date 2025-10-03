@@ -13,7 +13,7 @@
       box-shadow:0 2px 6px rgba(0,0,0,0.2); margin-bottom:20px; }
     label { display:block; margin-top:10px; }
     input, select, textarea { width:100%; padding:8px; margin-top:5px; border-radius:5px; border:1px solid #ccc; }
-    button { margin:5px; padding:10px 15px; border:none; border-radius:5px; cursor:pointer; }
+    button { margin-top:15px; padding:10px 15px; border:none; border-radius:5px; cursor:pointer; }
     button.primary { background:#003366; color:white; }
     button.secondary { background:#ccc; }
     table { width:100%; border-collapse:collapse; margin-top:20px; }
@@ -47,10 +47,6 @@
   <div class="history-card" id="historySection" style="display:none;">
     <h2>Historique des incidents</h2>
     <label>Filtrer par lieu <select id="filtreLieu" onchange="filtrerHistorique()"></select></label>
-    <div style="margin:10px 0;">
-      <button class="secondary" onclick="exportCSV()">📥 Exporter en CSV</button>
-      <button class="secondary" onclick="exportPDF()">📄 Exporter en PDF</button>
-    </div>
     <table id="tableHistorique">
       <thead>
         <tr>
@@ -147,28 +143,6 @@ function chargerData(){
   const d=localStorage.getItem("incidents");
   if(d) incidents=JSON.parse(d);
 }
-
-function exportCSV(){
-  let csv = "Date création;Date clôture;Lieu;Équipe;Type;Gravité;Status;Commentaire\n";
-  incidents.forEach(i=>{
-    csv += `${i.createdAt||""};${i.closureDate||""};${i.lieu||""};${i.equipe||""};${i.type||""};${i.gravite||""};${i.status||""};"${i.commentaire||""}"\n`;
-  });
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "incidents.csv"; a.click();
-}
-
-function exportPDF(){
-  const printWindow = window.open("", "", "width=800,height=600");
-  printWindow.document.write("<html><head><title>Incidents</title></head><body>");
-  printWindow.document.write("<h2>Historique des incidents</h2>");
-  printWindow.document.write(document.getElementById("tableHistorique").outerHTML);
-  printWindow.document.write("</body></html>");
-  printWindow.document.close();
-  printWindow.print();
-}
-
 window.onload=init;
 </script>
 </body>
